@@ -40,7 +40,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
   const fallRatio = result.morphology?.diastolic_fall_ratio;
   const sw50 = result.morphology?.sw50_sec;
 
-  // Calculate Star Health Wellness Score (0 to 100)
+  // Calculate AuraVitals Wellness Score (0 to 100)
   let wellnessScore = 88;
   if (isOk) {
     let score = 95;
@@ -106,11 +106,11 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
         <span className="report-timestamp">Report generated: {currentDate}</span>
       </div>
 
-      {/* Star Health Wellness Summary Banner */}
+      {/* AuraVitals Wellness Summary Banner */}
       <div className="wellness-banner">
         <div className="wellness-left">
           <div className="wellness-badge">
-            <Sparkles size={14} /> STAR HEALTH VITALS SCORECARD
+            <Sparkles size={14} /> AURAVITALS SCORECARD
           </div>
           <h1>Overall Wellness: {wellnessScore >= 85 ? "Optimal Balance" : "Good Stability"}</h1>
           <p>
