@@ -9,6 +9,11 @@ export interface BloodPressureAnalysis {
   sdnn_ms: number | null;
   stress_index: number | null;
   stress_level: string | null;
+  stress_level_ps?: string | null;
+  stress_index_ms?: number | null;
+  sns_zone?: number | null;
+  pns_zone?: number | null;
+  lf_hf_ratio?: number | null;
   systolic_mmhg: number | null;
   diastolic_mmhg: number | null;
   bp_category: string | null;
@@ -36,6 +41,11 @@ export interface HrvMetrics {
   sdnn_ms: number | null;
   stress_index: number | null;
   stress_level: string | null;
+  stress_level_ps?: string | null;
+  stress_index_ms?: number | null;
+  sns_zone?: number | null;
+  pns_zone?: number | null;
+  lf_hf_ratio?: number | null;
 }
 
 export interface BloodPressureEstimate {
@@ -54,6 +64,11 @@ export interface RppgAnalysisResponse {
   prq: number | null;
   stress_index: number | null;
   stress_level: string | null;
+  stress_level_ps?: string | null;
+  stress_index_ms?: number | null;
+  sns_zone?: number | null;
+  pns_zone?: number | null;
+  lf_hf_ratio?: number | null;
   duration_sec: number;
   fps_effective: number;
   samples: number;

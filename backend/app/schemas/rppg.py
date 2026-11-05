@@ -36,6 +36,11 @@ class HrvMetrics(BaseModel):
     sdnn_ms: float | None = None
     stress_index: float | None = None
     stress_level: str | None = None
+    stress_level_ps: str | None = None
+    stress_index_ms: float | None = None
+    sns_zone: int | None = None
+    pns_zone: int | None = None
+    lf_hf_ratio: float | None = None
 
 
 class BloodPressureEstimate(BaseModel):
@@ -54,6 +59,11 @@ class RppgAnalysisResponse(BaseModel):
     prq: float | None = None
     stress_index: float | None = None
     stress_level: str | None = None
+    stress_level_ps: str | None = None
+    stress_index_ms: float | None = None
+    sns_zone: int | None = None
+    pns_zone: int | None = None
+    lf_hf_ratio: float | None = None
     duration_sec: float = 0.0
     fps_effective: float = 0.0
     samples: int = 0

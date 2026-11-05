@@ -46,6 +46,11 @@ class VitalResult:
     prq: Optional[float] = None          # Pulse-Respiration Quotient: HR / Resp
     stress_index: Optional[float] = None # Autonomic stress score 0-100
     stress_level: Optional[str] = None   # Relaxed, Normal, Elevated, High Stress
+    stress_level_ps: Optional[str] = None # e.g. '1 ps', '2 ps'
+    stress_index_ms: Optional[float] = None # Time-domain stress index in ms (~75 ms)
+    sns_zone: Optional[int] = None       # Sympathetic tone zone (1 to 5)
+    pns_zone: Optional[int] = None       # Parasympathetic recovery zone (1 to 5)
+    lf_hf_ratio: Optional[float] = None  # Sympathovagal LF/HF ratio
     bvp: Optional[List[float]] = None    # recovered blood-volume-pulse waveform
     best_roi: Optional[str] = None
     morphology: Optional[Dict[str, Optional[float]]] = None
@@ -256,17 +261,32 @@ def analyze_trace(
     hrv_data = None
     stress_idx = None
     stress_lvl = None
+    stress_lvl_ps = None
+    stress_idx_ms = None
+    sns_zone_val = None
+    pns_zone_val = None
+    lf_hf_val = None
     try:
         hrv_res = calculate_hrv_from_bvp(bvp, fps, hr_bpm=hr_bpm)
         if hrv_res.mean_rri_ms is not None:
             stress_idx = hrv_res.stress_index
             stress_lvl = hrv_res.stress_level
+            stress_lvl_ps = hrv_res.stress_level_ps
+            stress_idx_ms = hrv_res.stress_index_ms
+            sns_zone_val = hrv_res.sns_zone
+            pns_zone_val = hrv_res.pns_zone
+            lf_hf_val = hrv_res.lf_hf_ratio
             hrv_data = {
                 "mean_rri_ms": hrv_res.mean_rri_ms,
                 "rmssd_ms": hrv_res.rmssd_ms,
                 "sdnn_ms": hrv_res.sdnn_ms,
                 "stress_index": hrv_res.stress_index,
                 "stress_level": hrv_res.stress_level,
+                "stress_level_ps": hrv_res.stress_level_ps,
+                "stress_index_ms": hrv_res.stress_index_ms,
+                "sns_zone": hrv_res.sns_zone,
+                "pns_zone": hrv_res.pns_zone,
+                "lf_hf_ratio": hrv_res.lf_hf_ratio,
             }
     except Exception:
         hrv_data = None
@@ -294,6 +314,11 @@ def analyze_trace(
         prq=prq_val,
         stress_index=stress_idx,
         stress_level=stress_lvl,
+        stress_level_ps=stress_lvl_ps,
+        stress_index_ms=stress_idx_ms,
+        sns_zone=sns_zone_val,
+        pns_zone=pns_zone_val,
+        lf_hf_ratio=lf_hf_val,
         duration_sec=float(dur),
         fps_effective=float(fps_eff),
         samples=sample_count,

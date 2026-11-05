@@ -79,6 +79,10 @@ def test_hrv_rmssd_and_sdnn_computed() -> None:
     assert res.sdnn_ms >= 0.0
     assert res.stress_index is not None
     assert res.stress_level in ("Relaxed", "Normal", "Elevated", "High Stress")
+    assert res.stress_level_ps in ("1 ps", "2 ps", "3 ps", "4 ps")
+    assert res.sns_zone in (1, 2, 3, 4, 5)
+    assert res.pns_zone in (1, 2, 3, 4, 5)
+    assert res.lf_hf_ratio is not None and res.lf_hf_ratio > 0.0
 
 
 def test_blood_pressure_endpoint_returns_hrv() -> None:
@@ -96,6 +100,9 @@ def test_blood_pressure_endpoint_returns_hrv() -> None:
     assert "sdnn_ms" in data
     assert "stress_index" in data
     assert "stress_level" in data
+    assert "sns_zone" in data
+    assert "pns_zone" in data
+    assert "lf_hf_ratio" in data
 
 
 def test_rppg_endpoint_returns_hrv() -> None:
@@ -115,4 +122,7 @@ def test_rppg_endpoint_returns_hrv() -> None:
     assert data["hrv"]["sdnn_ms"] is not None
     assert data["hrv"]["stress_index"] is not None
     assert data["hrv"]["stress_level"] in ("Relaxed", "Normal", "Elevated", "High Stress")
+    assert data["hrv"]["sns_zone"] in (1, 2, 3, 4, 5)
+    assert data["hrv"]["pns_zone"] in (1, 2, 3, 4, 5)
+    assert data["hrv"]["lf_hf_ratio"] is not None
 

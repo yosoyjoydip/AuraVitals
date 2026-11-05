@@ -798,6 +798,29 @@ button { cursor: pointer; }
   font-size: 11px;
 }
 
+.metrics-cardio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.stress-response-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .metrics-cardio-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stress-response-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
 .metrics-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1188,7 +1211,30 @@ button { cursor: pointer; }
     font-size: 11px;
   }
 
-  .metrics-pair {
+  .metrics-cardio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.stress-response-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .metrics-cardio-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .stress-response-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+.metrics-pair {
     grid-template-columns: 1fr;
     gap: 8px;
   }

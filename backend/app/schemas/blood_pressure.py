@@ -28,6 +28,11 @@ class BloodPressureAnalysisResponse(BaseModel):
     sdnn_ms: float | None = None
     stress_index: float | None = None
     stress_level: str | None = None
+    stress_level_ps: str | None = None
+    stress_index_ms: float | None = None
+    sns_zone: int | None = None
+    pns_zone: int | None = None
+    lf_hf_ratio: float | None = None
     systolic_mmhg: float | None = None
     diastolic_mmhg: float | None = None
     bp_category: str | None = None
