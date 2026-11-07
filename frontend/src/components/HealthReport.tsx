@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   HeartPulse,
   Activity,
@@ -10,9 +11,12 @@ import {
   ShieldCheck,
   ArrowLeft,
   Info,
+  Download,
+  FileText,
 } from "lucide-react";
 import type { RppgAnalysisResponse } from "../types";
 import { WaveformChart } from "./WaveformChart";
+import { generateHealthReportPdf } from "../utils/pdfGenerator";
 
 interface HealthReportProps {
   result: RppgAnalysisResponse;
@@ -20,6 +24,7 @@ interface HealthReportProps {
 }
 
 export function HealthReport({ result, onScanAgain }: HealthReportProps) {
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const isOk = result.status === "ok";
 
   const hr = result.heart_rate_bpm;
@@ -80,6 +85,18 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
     minute: "2-digit",
   });
 
+  const handleDownloadPdf = () => {
+    setIsGeneratingPdf(true);
+    try {
+      generateHealthReportPdf(result, wellnessScore);
+    } catch (err) {
+      console.error("PDF generation failed, falling back to print dialog:", err);
+      window.print();
+    } finally {
+      setTimeout(() => setIsGeneratingPdf(false), 600);
+    }
+  };
+
   if (!isOk) {
     return (
       <div className="report-container error-state">
@@ -124,7 +141,18 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
         <button className="back-btn" onClick={onScanAgain} type="button">
           <ArrowLeft size={16} /> Scan Another Person
         </button>
-        <span className="report-timestamp">Report generated: {currentDate}</span>
+        <div className="header-right-actions">
+          <button
+            className="btn-download-pdf-top"
+            onClick={handleDownloadPdf}
+            type="button"
+            disabled={isGeneratingPdf}
+            title="Download PDF Vital Signs Report"
+          >
+            <Download size={14} /> {isGeneratingPdf ? "Generating..." : "Download PDF"}
+          </button>
+          <span className="report-timestamp">Report: {currentDate}</span>
+        </div>
       </div>
 
       {/* AuraVitals Wellness Summary Banner */}
@@ -182,7 +210,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
           <div className="metrics-cardio-grid">
             <div className="metric-box highlight-box">
-              <span className="box-label">ESTIMATED BLOOD PRESSURE</span>
+              <span className="box-label">🩺 ESTIMATED BLOOD PRESSURE</span>
               <div className="box-val">
                 {sbp && dbp ? (
                   <>
@@ -202,7 +230,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">HEART RATE</span>
+              <span className="box-label">💓 HEART RATE</span>
               <div className="box-val">
                 {hr ? hr.toFixed(0) : "--"}{" "}
                 <small className="unit-label">bpm</small>
@@ -214,7 +242,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">MEAN RRi</span>
+              <span className="box-label">〰️ MEAN RRi</span>
               <div className="box-val">
                 {meanRri ? `${meanRri.toFixed(0)}` : "--"}{" "}
                 <small className="unit-label">ms</small>
@@ -226,7 +254,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">HRV RMSSD</span>
+              <span className="box-label">🫀 HRV RMSSD</span>
               <div className="box-val">
                 {rmssd ? `${rmssd.toFixed(1)}` : "--"}{" "}
                 <small className="unit-label">ms</small>
@@ -238,7 +266,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">HRV SDNN</span>
+              <span className="box-label">📊 HRV SDNN</span>
               <div className="box-val">
                 {sdnn ? `${sdnn.toFixed(1)}` : "--"}{" "}
                 <small className="unit-label">ms</small>
@@ -265,7 +293,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
           <div className="metrics-cardio-grid">
             <div className="metric-box">
-              <span className="box-label">RESPIRATORY RATE</span>
+              <span className="box-label">🫁 RESPIRATORY RATE</span>
               <div className="box-val">
                 {resp ? resp.toFixed(0) : "--"}{" "}
                 <small className="unit-label">breaths/min</small>
@@ -277,7 +305,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">BLOOD OXYGEN (SpO₂)</span>
+              <span className="box-label">🩸 BLOOD OXYGEN (SpO₂)</span>
               <div className="box-val">
                 {spo2 ? spo2.toFixed(0) : "--"}{" "}
                 <small className="unit-label">% SpO₂</small>
@@ -293,7 +321,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
             </div>
 
             <div className="metric-box">
-              <span className="box-label">PULSE-RESPIRATION QUOTIENT (PRQ)</span>
+              <span className="box-label">🔄 CARDIO-RESPIRATION (PRQ)</span>
               <div className="box-val">
                 {prq ? prq.toFixed(2) : "--"}{" "}
                 <small className="unit-label">HR / RR</small>
@@ -321,7 +349,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
           <div className="stress-response-grid">
             {/* 1. Stress Level */}
             <div className="metric-box">
-              <span className="box-label">STRESS LEVEL</span>
+              <span className="box-label">🧘 STRESS LEVEL</span>
               <div className="box-val">
                 {stressLevelPs}{" "}
                 <small className="unit-label">({stressLevel})</small>
@@ -336,7 +364,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
             {/* 2. Stress Index */}
             <div className="metric-box">
-              <span className="box-label">STRESS INDEX</span>
+              <span className="box-label">⏱️ STRESS INDEX</span>
               <div className="box-val">
                 {stressIndexMs ? `${stressIndexMs.toFixed(0)}` : (stressIndex ? `${stressIndex.toFixed(0)}` : "--")}{" "}
                 <small className="unit-label">ms</small>
@@ -349,7 +377,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
             {/* 3. Stress Response (SNS Zone) */}
             <div className="metric-box">
-              <span className="box-label">STRESS RESPONSE (SNS ZONE)</span>
+              <span className="box-label">⚡ STRESS RESPONSE (SNS ZONE)</span>
               <div className="box-val">
                 {snsZone != null ? snsZone : 2}{" "}
                 <small className="unit-label">Zone</small>
@@ -364,7 +392,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
             {/* 4. Recovery Ability (PNS Zone) */}
             <div className="metric-box">
-              <span className="box-label">RECOVERY ABILITY (PNS ZONE)</span>
+              <span className="box-label">💪 RECOVERY ABILITY (PNS ZONE)</span>
               <div className="box-val">
                 {pnsZone != null ? pnsZone : 2}{" "}
                 <small className="unit-label">Zone</small>
@@ -379,7 +407,7 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
             {/* 5. LF/HF Ratio */}
             <div className="metric-box">
-              <span className="box-label">LF / HF</span>
+              <span className="box-label">📈 LF / HF</span>
               <div className="box-val">
                 {lfHf != null ? lfHf.toFixed(3) : "--"}{" "}
                 <small className="unit-label">ms</small>
@@ -415,19 +443,19 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
 
             <div className="morphology-details-bar">
               <div className="morph-item">
-                <span>Systolic Rise Ratio</span>
+                <span>📈 Systolic Rise Ratio</span>
                 <strong>{riseRatio != null ? `${(riseRatio * 100).toFixed(0)}%` : "--"}</strong>
               </div>
               <div className="morph-item">
-                <span>Diastolic Fall Ratio</span>
+                <span>📉 Diastolic Fall Ratio</span>
                 <strong>{fallRatio != null ? `${(fallRatio * 100).toFixed(0)}%` : "--"}</strong>
               </div>
               <div className="morph-item">
-                <span>SW50 Pulse Width</span>
+                <span>📏 SW50 Pulse Width</span>
                 <strong>{sw50 != null ? `${sw50.toFixed(2)} s` : "--"}</strong>
               </div>
               <div className="morph-item">
-                <span>Sampling Resolution</span>
+                <span>🔬 Sampling Resolution</span>
                 <strong>250 Hz Cubic Spline</strong>
               </div>
             </div>
@@ -435,8 +463,16 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
         )}
       </div>
 
-      {/* Action Footer */}
+      {/* Action Footer with Download PDF button */}
       <div className="report-actions">
+        <button
+          className="download-action-btn"
+          onClick={handleDownloadPdf}
+          type="button"
+          disabled={isGeneratingPdf}
+        >
+          <FileText size={17} /> {isGeneratingPdf ? "Preparing Document..." : "Download Complete PDF Report"}
+        </button>
         <button className="primary-action-btn" onClick={onScanAgain} type="button">
           <RotateCcw size={17} /> Take Another 15s Scan
         </button>

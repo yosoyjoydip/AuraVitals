@@ -643,6 +643,33 @@ button { cursor: pointer; }
   gap: 20px;
   margin-top: 20px;
 }
+.header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.btn-download-pdf-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #10b981;
+  background: #f0fdf4;
+  color: #065f46;
+  font: 700 11.5px Manrope, sans-serif;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-download-pdf-top:hover:not(:disabled) {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+.btn-download-pdf-top:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .report-header {
   display: flex;
   justify-content: space-between;
@@ -996,7 +1023,33 @@ button { cursor: pointer; }
 .report-actions {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+.download-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 14px 24px;
+  border-radius: 14px;
+  border: 1px solid #10b981;
+  background: #f0fdf4;
+  color: #065f46;
+  font: 700 14px Manrope, sans-serif;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.15);
+  transition: all 0.15s ease;
+}
+.download-action-btn:hover:not(:disabled) {
+  background: #dcfce7;
+  transform: translateY(-1px);
+}
+.download-action-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 .primary-action-btn {
   display: inline-flex;
@@ -1256,5 +1309,35 @@ button { cursor: pointer; }
     gap: 6px;
     text-align: center;
     margin-top: 24px;
+  }
+}
+
+/* Print Styles for Clinical PDF Export */
+@media print {
+  .report-header,
+  .report-actions,
+  .back-btn,
+  .btn-download-pdf-top,
+  .camera-card,
+  .landing-hero,
+  nav,
+  .footer {
+    display: none !important;
+  }
+  body, .app-shell, .report-container {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+  }
+  .report-section-card {
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .wellness-banner {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
