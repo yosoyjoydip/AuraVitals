@@ -342,3 +342,4 @@ export function generateHealthReportPdf(
   const filename = `AuraVitals_Health_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
   doc.save(filename);
 }
+
