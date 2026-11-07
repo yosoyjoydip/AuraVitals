@@ -120,10 +120,17 @@ def pos_wang(rgb: np.ndarray, fs: float) -> np.ndarray:
 
 
 def _fft_hr_sqi(bvp: np.ndarray, fs: float, low: float, high: float) -> Tuple[Optional[float], float]:
-    """Calculate dominant frequency and spectral SNR (SQI)."""
-    x = np.expand_dims(bvp, 0)
-    nfft = _next_power_of_2(x.shape[1])
-    f, pxx = sps.periodogram(x, fs=fs, nfft=nfft, detrend=False)
+    """Calculate dominant frequency and spectral SNR (SQI) using Hann window and harmonic weighting."""
+    x = bvp.flatten().astype(np.float64)
+    n_samples = len(x)
+    if n_samples < int(fs * 4.0):
+        return None, 0.0
+
+    nfft = _next_power_of_2(n_samples * 2)
+    window = sps.windows.hann(n_samples)
+    xw = (x - np.mean(x)) * window
+
+    f, pxx = sps.periodogram(xw, fs=fs, nfft=nfft, detrend=False)
     f, pxx = f.flatten(), pxx.flatten()
     band = (f >= low) & (f <= high)
     if not np.any(band):
@@ -131,8 +138,33 @@ def _fft_hr_sqi(bvp: np.ndarray, fs: float, low: float, high: float) -> Tuple[Op
     total = float(np.sum(pxx[band]))
     if total <= 0:
         return None, 0.0
+
     band_idx = np.where(band)[0]
-    f0 = float(f[band_idx[int(np.argmax(pxx[band_idx]))]])
+    band_f = f[band_idx]
+    band_pxx = pxx[band_idx]
+
+    # Candidate peak detection with harmonic scoring:
+    # Arterial pulse waves have prominent fundamental (f0) and second harmonic (2*f0).
+    # Weighting candidate peaks by their harmonic power rejects spurious low-frequency motion spikes.
+    prominence_thresh = max(float(np.max(band_pxx)) * 0.12, 1e-6)
+    peaks, _ = sps.find_peaks(band_pxx, prominence=prominence_thresh)
+
+    if len(peaks) > 0:
+        best_score = -1.0
+        best_f = band_f[peaks[0]]
+        for p in peaks:
+            f_cand = band_f[p]
+            p_fund = band_pxx[p]
+            # Second harmonic window around 2 * f_cand
+            near_2f = (f >= 2 * f_cand - 0.12) & (f <= 2 * f_cand + 0.12)
+            p_harm = float(np.sum(pxx[near_2f])) if np.any(near_2f) else 0.0
+            score = p_fund + 0.6 * p_harm
+            if score > best_score:
+                best_score = score
+                best_f = f_cand
+        f0 = float(best_f)
+    else:
+        f0 = float(band_f[int(np.argmax(band_pxx))])
 
     def near(center: float) -> np.ndarray:
         return (f >= center - 0.1) & (f <= center + 0.1) & band
@@ -269,6 +301,17 @@ def analyze_trace(
     try:
         hrv_res = calculate_hrv_from_bvp(bvp, fps, hr_bpm=hr_bpm)
         if hrv_res.mean_rri_ms is not None:
+            # Time-Frequency Reconciliation:
+            # When cubic-spline peak detection recovers valid systolic beats,
+            # its Mean RRi interval (60000 / Mean RRi) represents the true physical pulse rate.
+            # Reconcile if FFT was skewed by low-frequency motion or breathing harmonics.
+            if hrv_res.valid_intervals_count >= 5 and hrv_res.mean_rri_ms > 0:
+                time_domain_hr = 60000.0 / hrv_res.mean_rri_ms
+                if abs(hr_bpm - time_domain_hr) > 4.5:
+                    hr_bpm = round(time_domain_hr, 1)
+                    if resp_bpm is not None and resp_bpm > 0:
+                        prq_val = round(float(hr_bpm) / float(resp_bpm), 2)
+
             stress_idx = hrv_res.stress_index
             stress_lvl = hrv_res.stress_level
             stress_lvl_ps = hrv_res.stress_level_ps

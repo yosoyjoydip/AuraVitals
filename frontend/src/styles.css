@@ -723,6 +723,11 @@ button { cursor: pointer; }
   font-size: 10.5px;
   font-weight: 500;
 }
+.wellness-tag.tag-warning {
+  background: rgba(245, 158, 11, 0.22);
+  color: #fef3c7;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
 
 .wellness-score-circle {
   width: 120px;

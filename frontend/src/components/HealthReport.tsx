@@ -55,12 +55,21 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
   // Calculate AuraVitals Wellness Score (0 to 100)
   let wellnessScore = 88;
   if (isOk) {
-    let score = 95;
+    let score = 94;
+    // Signal Quality / Confidence weighting:
+    // If optical SQI was low (e.g. < 50% due to lighting or micro-movement),
+    // scale the score appropriately so the user understands the scan quality.
+    if (result.hr_sqi < 0.50) {
+      score -= 16;
+    } else if (result.hr_sqi < 0.70) {
+      score -= 7;
+    }
+
     if (hr && (hr < 55 || hr > 100)) score -= 10;
     if (spo2 && spo2 < 95) score -= 12;
     if (stressIndex && stressIndex > 65) score -= 12;
     if (sbp && sbp > 130) score -= 8;
-    wellnessScore = Math.max(60, Math.min(98, score));
+    wellnessScore = Math.max(50, Math.min(98, score));
   }
 
   const currentDate = new Date().toLocaleDateString("en-US", {
@@ -124,14 +133,22 @@ export function HealthReport({ result, onScanAgain }: HealthReportProps) {
           <div className="wellness-badge">
             <Sparkles size={14} /> AURAVITALS SCORECARD
           </div>
-          <h1>Overall Wellness: {wellnessScore >= 85 ? "Optimal Balance" : "Good Stability"}</h1>
+          <h1>
+            {result.hr_sqi < 0.50
+              ? "Overall Wellness: Moderate Quality Scan"
+              : wellnessScore >= 85
+              ? "Overall Wellness: Optimal Balance"
+              : "Overall Wellness: Good Stability"}
+          </h1>
           <p>
-            Your resting cardiovascular cycle, arterial oxygenation, and parasympathetic vagal
-            variability reflect a stable autonomic state.
+            {result.hr_sqi < 0.50
+              ? "Optical signal quality was moderate. While pulse dynamics were recovered, steady lighting and minimal movement are recommended for maximum clinical precision."
+              : "Your resting cardiovascular cycle, arterial oxygenation, and parasympathetic vagal variability reflect a stable autonomic state."}
           </p>
           <div className="wellness-tags">
-            <span className="wellness-tag">
-              <CheckCircle2 size={13} /> Optical SQI: {(result.hr_sqi * 100).toFixed(0)}%
+            <span className={`wellness-tag ${result.hr_sqi < 0.50 ? "tag-warning" : ""}`}>
+              {result.hr_sqi < 0.50 ? <AlertCircle size={13} /> : <CheckCircle2 size={13} />}{" "}
+              Optical SQI: {(result.hr_sqi * 100).toFixed(0)}%
             </span>
             <span className="wellness-tag">
               <ShieldCheck size={13} /> Private & On-Device Analysis
